@@ -32,7 +32,7 @@ class VariantTrack extends React.Component {
   }
 
   render(): any {
-      return <canvas onClick={this.handleClick.bind(this)} onMouseMove={this.handleMouseMove.bind(this)}/>;
+      return <canvas onClick={this.handleClick.bind(this)} onMouseMove={this.handleMouseMove.bind(this)} onMouseLeave={this.handleMouseLeave.bind(this)}/>;
   }
 
   componentDidMount() {
@@ -123,6 +123,13 @@ class VariantTrack extends React.Component {
 	  }
       }
 
+  handleMouseLeave(reactEvent: any)
+    {
+	  var info = this.mouseInfo(reactEvent);
+	  if (typeof this.props.options.onVariantMouseLeave === "function") {
+              this.props.options.onVariantMouseLeave(info.variants,info.event);
+	  }
+    }
   mouseInfo(reactEvent: any) {
       var ev = reactEvent.nativeEvent,
           x = ev.offsetX,
