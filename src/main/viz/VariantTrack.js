@@ -32,7 +32,7 @@ class VariantTrack extends React.Component {
   }
 
   render(): any {
-    return <canvas onClick={this.handleClick.bind(this)} />;
+      return <canvas onClick={this.handleClick.bind(this)} onMouseMove={this.handleMouseMove.bind(this)}/>;
   }
 
   componentDidMount() {
@@ -74,7 +74,7 @@ class VariantTrack extends React.Component {
         scale = this.getScale(),
         height = this.props.height,
         y = height - style.VARIANT_HEIGHT - 1;
-
+      
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.reset();
     ctx.save();
@@ -113,34 +113,52 @@ class VariantTrack extends React.Component {
     ctx.restore();
   }
 
-  handleClick(reactEvent: any) {
-    var ev = reactEvent.nativeEvent,
-        x = ev.offsetX,
-        y = ev.offsetY,
-        canvas = ReactDOM.findDOMNode(this),
-        ctx = canvasUtils.getContext(canvas),
-        trackingCtx = new dataCanvas.ClickTrackingContext(ctx, x, y);
-    this.renderScene(trackingCtx);
+  handleMouseMove(reactEvent: any)
+      {
+	  var info = this.mouseInfo(reactEvent);
+	  if (typeof this.props.options.onVariantMouseMove === "function") {
+              this.props.options.onVariantMouseMove(info.variants,info.event);
+	  } else if (info.variants.length > 0) {
+              console.log("Variants mouse move: ", info.variants, info.event);
+	  }
+      }
 
-    var variants = trackingCtx.hit;
-    if (variants && variants.length>0) {
+  mouseInfo(reactEvent: any) {
+      var ev = reactEvent.nativeEvent,
+          x = ev.offsetX,
+          y = ev.offsetY,
+          canvas = ReactDOM.findDOMNode(this),
+          ctx = canvasUtils.getContext(canvas),
+          trackingCtx = new dataCanvas.ClickTrackingContext(ctx, x, y);
+
+      this.renderScene(trackingCtx);      
+
+      var variants = trackingCtx.hit;
       var data = [];
-      for (var i=0;i<variants.length;i++) {
-        data.push({
-          id:       variants[i].id,
-          vcfLine:  variants[i].vcfLine,
-          ref:      variants[i].ref,
-          alt:      variants[i].alt});
+     
+      if (variants && variants.length>0) {
+        for (var i=0;i<variants.length;i++) {
+          data.push({
+            id:       variants[i].id,
+            vcfLine:  variants[i].vcfLine,
+            ref:      variants[i].ref,
+            alt:      variants[i].alt});
+        }
       }
-      //user provided function for displaying popup
+      return {variants:data,
+	      event:ev};
+  }
+
+  handleClick(reactEvent: any) {
+    var info = this.mouseInfo(reactEvent)
       if (typeof this.props.options.onVariantClicked  === "function") {
-        this.props.options.onVariantClicked(data);
+          this.props.options.onVariantClicked(info.variants,info.event);
       } else {
-        console.log("Variants clicked: ", data);
+          console.log("Variants clicked: ", info.variants, info.event);
       }
-    }
   }
 }
+
 
 VariantTrack.displayName = 'variants';
 
