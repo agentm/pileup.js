@@ -148,6 +148,7 @@ class VariantTrack extends React.Component {
           data.push({
             id:       variants[i].id,
             vcfLine:  variants[i].vcfLine,
+            position: variants[i].position,
             ref:      variants[i].ref,
             alt:      variants[i].alt});
         }
